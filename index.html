@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piškvorky</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #game-board table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        #game-board td {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #000;
+            text-align: center;
+            font-size: 2em;
+            cursor: pointer;
+            background-color: #f0f0f0;
+        }
+
+        #game-board td:hover {
+            background-color: #d0d0d0;
+        }
+
+        #status {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Piškvorky</h1>
+    <div id="game-board">
+        <!-- Mřížka pro hru -->
+        <table>
+            <tr>
+                <td data-id="0"></td>
+                <td data-id="1"></td>
+                <td data-id="2"></td>
+            </tr>
+            <tr>
+                <td data-id="3"></td>
+                <td data-id="4"></td>
+                <td data-id="5"></td>
+            </tr>
+            <tr>
+                <td data-id="6"></td>
+                <td data-id="7"></td>
+                <td data-id="8"></td>
+            </tr>
+        </table>
+    </div>
+    <div id="status">
+        <p id="turn">Na řadě je hráč X</p>
+        <button id="reset">Nová hra</button>
+    </div>
+    <script>
+        // Inicializace proměnných
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', '']; // Stav herní desky
+        let gameActive = true;
+
+        // Funkce pro změnu hráče
+        function changePlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            document.getElementById('turn').innerText = `Na řadě je hráč ${currentPlayer}`;
+        }
+
+        // Funkce pro kontrolu vítězství
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // horizontální řady
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // vertikální sloupce
+                [0, 4, 8], [2, 4, 6] // diagonály
+            ];
+
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    gameActive = false;
+                    document.getElementById('turn').innerText = `Hráč ${currentPlayer} vyhrál!`;
+                    return;
+                }
+            }
+
+            // Kontrola remízy
+            if (!gameBoard.includes('')) {
+                gameActive = false;
+                document.getElementById('turn').innerText = 'Remíza!';
+            }
+        }
+
+        // Funkce pro resetování hry
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            document.getElementById('turn').innerText = `Na řadě je hráč ${currentPlayer}`;
+            const cells = document.querySelectorAll('#game-board td');
+            cells.forEach(cell => cell.innerText = '');
+        }
+
+        // Funkce pro kliknutí na buňku
+        function cellClick(event) {
+            const cell = event.target;
+            const cellId = cell.getAttribute('data-id');
+
+            // Pokud je buňka již vyplněná nebo hra skončila, neprováděj nic
+            if (gameBoard[cellId] !== '' || !gameActive) return;
+
+            // Nastavení symbolu
+            gameBoard[cellId] = currentPlayer;
+            cell.innerText = currentPlayer;
+
+            // Kontrola vítězství
+            checkWinner();
+
+            // Změna hráče
+            if (gameActive) {
+                changePlayer();
+            }
+        }
+
+        // Přidání posluchačů událostí pro buňky
+        const cells = document.querySelectorAll('#game-board td');
+        cells.forEach(cell => cell.addEventListener('click', cellClick));
+
+        // Resetování hry po stisknutí tlačítka
+        document.getElementById('reset').addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
