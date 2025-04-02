@@ -42,11 +42,49 @@
             font-size: 16px;
             cursor: pointer;
         }
+
+        .win-line {
+            position: absolute;
+            background-color: red;
+            z-index: 1;
+        }
+
+        .horizontal {
+            height: 5px;
+            width: 100%;
+            top: 50%;
+            left: 0;
+        }
+
+        .vertical {
+            width: 5px;
+            height: 100%;
+            left: 50%;
+            top: 0;
+        }
+
+        .diagonal-left {
+            width: 5px;
+            height: 141px;
+            top: 0;
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 0 0;
+        }
+
+        .diagonal-right {
+            width: 5px;
+            height: 141px;
+            top: 0;
+            right: 0;
+            transform: rotate(-45deg);
+            transform-origin: 100% 0;
+        }
     </style>
 </head>
 <body>
     <h1>Piškvorky</h1>
-    <div id="game-board">
+    <div id="game-board" style="position: relative;">
         <!-- Mřížka pro hru -->
         <table>
             <tr>
@@ -89,14 +127,19 @@
                 [0, 3, 6], [1, 4, 7], [2, 5, 8], // vertikální sloupce
                 [0, 4, 8], [2, 4, 6] // diagonály
             ];
+            let winningLines = [];
 
             for (let pattern of winPatterns) {
                 const [a, b, c] = pattern;
                 if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
-                    gameActive = false;
-                    document.getElementById('turn').innerText = `Hráč ${currentPlayer} vyhrál!`;
-                    return;
+                    winningLines.push(pattern);
                 }
+            }
+
+            if (winningLines.length > 0) {
+                gameActive = false;
+                document.getElementById('turn').innerText = `Hráč ${currentPlayer} vyhrál!`;
+                drawWinningLines(winningLines);
             }
 
             // Kontrola remízy
@@ -104,6 +147,33 @@
                 gameActive = false;
                 document.getElementById('turn').innerText = 'Remíza!';
             }
+        }
+
+        // Funkce pro kreslení čar vítězství
+        function drawWinningLines(lines) {
+            const board = document.getElementById('game-board');
+
+            lines.forEach(line => {
+                let div = document.createElement('div');
+                const [a, b, c] = line;
+                const cells = document.querySelectorAll('#game-board td');
+
+                // Určení směru čáry
+                if (a === b && b === c) {
+                    if (a === 0 || a === 3 || a === 6) {
+                        // Vertikální čára
+                        div.classList.add('win-line', 'vertical');
+                        div.style.top = `${Math.min(a, b, c) * 100}px`;
+                    } else if (a === 0 || a === 1 || a === 2) {
+                        // Horizontální čára
+                        div.classList.add('win-line', 'horizontal');
+                        div.style.left = `${Math.min(a, b, c) * 100}px`;
+                    } else if (a === 0 || a === 4 || a === 8) {
+                        // Diagonální čára
+                        div.classList.add('win-line', 'diagonal-left');
+                    }
+                }
+            });
         }
 
         // Funkce pro resetování hry
@@ -114,6 +184,9 @@
             document.getElementById('turn').innerText = `Na řadě je hráč ${currentPlayer}`;
             const cells = document.querySelectorAll('#game-board td');
             cells.forEach(cell => cell.innerText = '');
+            // Odstranit případné čáry
+            const lines = document.querySelectorAll('.win-line');
+            lines.forEach(line => line.remove());
         }
 
         // Funkce pro kliknutí na buňku
