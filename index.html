@@ -14,6 +14,11 @@
             color: #333;
         }
 
+        #game-board {
+            position: relative;
+            display: inline-block;
+        }
+
         #game-board table {
             margin: 0 auto;
             border-collapse: collapse;
@@ -51,21 +56,21 @@
 
         .horizontal {
             height: 5px;
-            width: 100%;
+            width: 300px;
             top: 50%;
             left: 0;
         }
 
         .vertical {
             width: 5px;
-            height: 100%;
+            height: 300px;
             left: 50%;
             top: 0;
         }
 
         .diagonal-left {
             width: 5px;
-            height: 141px;
+            height: 300px;
             top: 0;
             left: 0;
             transform: rotate(45deg);
@@ -74,7 +79,7 @@
 
         .diagonal-right {
             width: 5px;
-            height: 141px;
+            height: 300px;
             top: 0;
             right: 0;
             transform: rotate(-45deg);
@@ -83,8 +88,8 @@
     </style>
 </head>
 <body>
-    <h1>Piškvorky V2</h1>
-    <div id="game-board" style="position: relative;">
+    <h1>Piškvorky</h1>
+    <div id="game-board">
         <!-- Mřížka pro hru -->
         <table>
             <tr>
@@ -156,22 +161,31 @@
             lines.forEach(line => {
                 let div = document.createElement('div');
                 const [a, b, c] = line;
-                const cells = document.querySelectorAll('#game-board td');
 
-                // Určení směru čáry
-                if (a === b && b === c) {
-                    if (a === 0 || a === 3 || a === 6) {
-                        // Vertikální čára
-                        div.classList.add('win-line', 'vertical');
-                        div.style.top = `${Math.min(a, b, c) * 100}px`;
-                    } else if (a === 0 || a === 1 || a === 2) {
-                        // Horizontální čára
-                        div.classList.add('win-line', 'horizontal');
-                        div.style.left = `${Math.min(a, b, c) * 100}px`;
-                    } else if (a === 0 || a === 4 || a === 8) {
-                        // Diagonální čára
-                        div.classList.add('win-line', 'diagonal-left');
-                    }
+                // Horizontální vítězná linie
+                if (a === b && b === c && (a === 0 || a === 3 || a === 6)) {
+                    div.classList.add('win-line', 'horizontal');
+                    div.style.top = `${Math.floor(a / 3) * 100 + 50}px`; // Pozice horizontální čáry
+                    board.appendChild(div);
+                }
+
+                // Vertikální vítězná linie
+                if (a === b && b === c && (a === 0 || a === 1 || a === 2)) {
+                    div.classList.add('win-line', 'vertical');
+                    div.style.left = `${(a % 3) * 100 + 50}px`; // Pozice vertikální čáry
+                    board.appendChild(div);
+                }
+
+                // Diagonální vítězná linie (left-to-right)
+                if ([0, 4, 8].every(i => line.includes(i))) {
+                    div.classList.add('win-line', 'diagonal-left');
+                    board.appendChild(div);
+                }
+
+                // Diagonální vítězná linie (right-to-left)
+                if ([2, 4, 6].every(i => line.includes(i))) {
+                    div.classList.add('win-line', 'diagonal-right');
+                    board.appendChild(div);
                 }
             });
         }
